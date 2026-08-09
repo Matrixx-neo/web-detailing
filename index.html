@@ -164,10 +164,61 @@
     transition:max-height .35s ease;
   }
   #mobile-menu.open{max-height:320px;}
+
+  /* Floating success toast */
+  #toast{
+    position:fixed;
+    top:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(-16px);
+    z-index:100;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:linear-gradient(135deg, #171B22 0%, #12151B 100%);
+    border:1px solid rgba(91,144,255,0.35);
+    box-shadow:0 16px 40px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(91,144,255,0.06);
+    color:var(--text-white);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:0.9rem;
+    padding:14px 22px;
+    border-radius:999px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .35s ease, transform .35s ease;
+    max-width:90vw;
+    text-align:center;
+  }
+  #toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+  #toast .toast-icon{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:rgba(47,111,240,0.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  @media (prefers-reduced-motion: reduce){
+    #toast{transition:none;}
+  }
 </style>
 </head>
 
 <body class="antialiased">
+
+<!-- Floating success toast -->
+<div id="toast" role="status" aria-live="polite">
+  <span class="toast-icon">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="#5B90FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </span>
+  <span id="toast-message">¡Reserva recibida con éxito!</span>
+</div>
 
 <!-- ============ HEADER ============ -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-[#0A0C10]/85 backdrop-blur-md border-b border-[#242832]">
@@ -508,11 +559,26 @@
   // Set min date to today
   document.getElementById('date').min = new Date().toISOString().split('T')[0];
 
-  // Booking form -> WhatsApp
+  // Booking form -> Make webhook (JSON) + WhatsApp
   const WHATSAPP_NUMBER = "13364032734"; // (336) 403-2734, US country code
+  const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/i881veabgto4djuax95gueuvdukvqajz";
   const form = document.getElementById('booking-form');
 
-  form.addEventListener('submit', function(e){
+  // Floating toast helper
+  let toastTimer;
+  function showToast(message, isError){
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    toastMessage.textContent = message;
+    toast.style.borderColor = isError ? 'rgba(240,80,80,0.4)' : 'rgba(91,144,255,0.35)';
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 4000);
+  }
+
+  form.addEventListener('submit', async function(e){
     e.preventDefault();
 
     const fullName = document.getElementById('fullName').value.trim();
@@ -530,6 +596,40 @@
     const dateObj = new Date(dateRaw + 'T00:00:00');
     const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnHTML = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.7';
+    submitBtn.innerHTML = 'Sending…';
+
+    const payload = {
+      fullName: fullName,
+      phone: phone,
+      vehicle: vehicle,
+      service: service,
+      preferredDate: dateRaw,
+      preferredDateFormatted: formattedDate,
+      preferredTime: time,
+      source: "MC Mobile Detail Website"
+    };
+
+    // Send booking data to Make webhook
+    try {
+      await fetch(MAKE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      showToast('¡Reserva recibida con éxito!', false);
+    } catch (err) {
+      console.error('Webhook error:', err);
+      showToast('Reserva guardada. Continuando por WhatsApp…', true);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHTML;
+    }
+
+    // Also open WhatsApp with the pre-filled message
     const message =
 `Hello MC Mobile Detail, I'd like to schedule an appointment:
 
