@@ -454,6 +454,16 @@
       </div>
 
       <div class="sm:col-span-2">
+        <label class="eyebrow block mb-2" for="address">Service Address</label>
+        <input required id="address" name="address" type="text" placeholder="Start typing your street address…" autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm">
+      </div>
+
+      <div>
+        <label class="eyebrow block mb-2" for="zipCode">Zip Code</label>
+        <input required id="zipCode" name="zipCode" type="text" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" maxlength="10" placeholder="24060" class="w-full rounded-xl px-4 py-3 text-sm">
+      </div>
+
+      <div>
         <label class="eyebrow block mb-2" for="service">Service Requested</label>
         <select required id="service" name="service" class="w-full rounded-xl px-4 py-3 text-sm">
           <option value="" disabled selected>Select a service</option>
@@ -584,11 +594,13 @@
     const fullName = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
     const vehicle = document.getElementById('vehicle').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const zipCode = document.getElementById('zipCode').value.trim();
     const service = document.getElementById('service').value;
     const dateRaw = document.getElementById('date').value;
     const time = document.getElementById('time').value;
 
-    if (!fullName || !phone || !vehicle || !service || !dateRaw || !time) {
+    if (!fullName || !phone || !vehicle || !address || !zipCode || !service || !dateRaw || !time) {
       alert("Please fill in all fields before submitting.");
       return;
     }
@@ -606,6 +618,8 @@
       fullName: fullName,
       phone: phone,
       vehicle: vehicle,
+      address: address,
+      zipCode: zipCode,
       service: service,
       preferredDate: dateRaw,
       preferredDateFormatted: formattedDate,
@@ -636,6 +650,7 @@
 *Name:* ${fullName}
 *Phone:* ${phone}
 *Vehicle:* ${vehicle}
+*Location:* ${address}, ${zipCode}
 *Service:* ${service}
 *Preferred Date:* ${formattedDate}
 *Preferred Time:* ${time}
@@ -647,7 +662,49 @@ Please confirm my booking. Thank you!`;
 
     window.open(whatsappURL, '_blank');
   });
+
+  // ------------------------------------------------------------------
+  // OPTIONAL: Google Places Autocomplete for the address field.
+  // This helps guarantee an address Google Maps can resolve precisely,
+  // which is useful for calculating accurate 30–40 min travel routes.
+  //
+  // To enable: replace YOUR_GOOGLE_MAPS_API_KEY below with a valid key
+  // (Google Cloud Console → enable "Places API") and uncomment the
+  // <script> tag right before </body>. The form works perfectly fine
+  // as a plain required text field even without this enabled.
+  // ------------------------------------------------------------------
+  function initAddressAutocomplete(){
+    const addressInput = document.getElementById('address');
+    const zipInput = document.getElementById('zipCode');
+    if (!addressInput || typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+
+    const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+      types: ['address'],
+      componentRestrictions: { country: 'us' }
+    });
+
+    autocomplete.addListener('place_changed', function(){
+      const place = autocomplete.getPlace();
+      if (!place || !place.address_components) return;
+
+      let zip = '';
+      place.address_components.forEach(component => {
+        if (component.types.includes('postal_code')) {
+          zip = component.long_name;
+        }
+      });
+      if (zip) zipInput.value = zip;
+    });
+  }
+  window.initAddressAutocomplete = initAddressAutocomplete;
 </script>
+
+<!--
+  Uncomment and add your Google Maps API key to enable address
+  autocomplete + validation on the "Service Address" field:
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initAddressAutocomplete" async defer></script>
+-->
 
 </body>
 </html>
