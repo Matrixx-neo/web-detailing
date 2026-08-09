@@ -565,12 +565,13 @@
 
       <div class="md:col-span-2">
         <label class="eyebrow block mb-2" for="address">Service Address</label>
-        <input required id="address" name="address" type="text" placeholder="Start typing your street address…" autocomplete="off" class="w-full rounded-xl px-4 py-3 text-sm">
+        <input required id="address" name="address" type="text" placeholder="123 Main St, Blacksburg, VA" autocomplete="street-address" class="w-full rounded-xl px-4 py-3 text-sm">
+        <p class="text-muted text-xs mt-2">Format: Street Address, City, State — e.g. "123 Main St, Blacksburg, VA". Your Zip Code below is appended automatically.</p>
       </div>
 
       <div>
         <label class="eyebrow block mb-2" for="zipCode">Zip Code</label>
-        <input required id="zipCode" name="zipCode" type="text" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" maxlength="10" placeholder="24060" class="w-full rounded-xl px-4 py-3 text-sm">
+        <input required id="zipCode" name="zipCode" type="text" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" maxlength="10" placeholder="24060" autocomplete="postal-code" class="w-full rounded-xl px-4 py-3 text-sm">
       </div>
 
       <div>
@@ -964,6 +965,32 @@
     }, 4000);
   }
 
+  // --------------------------------------------------------------------
+  // US ADDRESS NORMALIZATION (client-side, no external API / no API key)
+  // Builds the official US mailing-address format that Google Maps
+  // resolves reliably: "Street, City, State ZIP" (e.g. "123 Main St,
+  // Blacksburg, VA 24060"). Never erases or rewrites what the user typed
+  // in #address — it only appends the Zip Code from #zipCode at the end,
+  // and only if that zip isn't already present in the address text.
+  // --------------------------------------------------------------------
+  function buildFullAddress(rawAddress, rawZip){
+    const cleanAddress = (rawAddress || '').trim().replace(/\s+/g, ' ').replace(/,\s*$/, '');
+    const cleanZip = (rawZip || '').trim();
+    if (!cleanZip) return cleanAddress;
+
+    // Compare digits only, so "24060" matches whether the user wrote
+    // "24060", "24060-1234", or included it with different spacing.
+    const zipDigits = cleanZip.replace(/\D/g, '');
+    const addressDigits = cleanAddress.replace(/\D/g, '');
+
+    if (zipDigits && addressDigits.includes(zipDigits)) {
+      // Zip is already present somewhere in the address the user typed
+      return cleanAddress;
+    }
+
+    return `${cleanAddress}, ${cleanZip}`;
+  }
+
   form.addEventListener('submit', async function(e){
     e.preventDefault();
 
@@ -984,6 +1011,10 @@
     const dateObj = new Date(dateRaw + 'T00:00:00');
     const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+    // Official US format: "Street, City, State ZIP" — appends the Zip
+    // Code to whatever the user typed in #address, without altering it.
+    const fullAddress = buildFullAddress(address, zipCode);
+
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalBtnHTML = submitBtn.innerHTML;
     submitBtn.disabled = true;
@@ -994,7 +1025,7 @@
       fullName: fullName,
       phone: phone,
       vehicle: vehicle,
-      address: address,
+      address: fullAddress,
       zipCode: zipCode,
       service: service,
       preferredDate: dateRaw,
@@ -1026,7 +1057,7 @@
 *Name:* ${fullName}
 *Phone:* ${phone}
 *Vehicle:* ${vehicle}
-*Location:* ${address}, ${zipCode}
+*Location:* ${fullAddress}
 *Service:* ${service}
 *Preferred Date:* ${formattedDate}
 *Preferred Time:* ${time}
