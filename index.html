@@ -135,6 +135,26 @@
   }
   select option{background:var(--bg-panel);}
 
+  /* Preferred Time — fixed slot buttons */
+  .time-slot-btn{
+    background:var(--bg-void);
+    border:1px solid var(--line);
+    color:var(--text-white);
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease, opacity .2s ease;
+  }
+  .time-slot-btn:hover:not(:disabled){
+    border-color:var(--accent-blue-2);
+  }
+  .time-slot-btn.selected{
+    border-color:var(--accent-blue-2);
+    background:rgba(47,111,240,0.15);
+  }
+  .time-slot-btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+
   .nav-link{
     position:relative;
     color:var(--text-muted);
@@ -592,11 +612,16 @@
       </div>
 
       <div>
-        <label class="eyebrow block mb-2" for="time">Preferred Time</label>
-        <select required id="time" name="time" class="w-full rounded-xl px-4 py-3 text-sm">
-          <option value="" disabled selected>Select a time</option>
-          <!-- populated 8:00 AM to 6:00 PM by JS -->
-        </select>
+        <label class="eyebrow block mb-2">Preferred Time</label>
+        <div id="time-slots" class="grid grid-cols-2 gap-3">
+          <button type="button" class="time-slot-btn rounded-xl py-3 text-sm font-display font-medium" data-time="08:00 AM" data-minutes="480">8:00 AM</button>
+          <button type="button" class="time-slot-btn rounded-xl py-3 text-sm font-display font-medium" data-time="11:00 AM" data-minutes="660">11:00 AM</button>
+          <button type="button" class="time-slot-btn rounded-xl py-3 text-sm font-display font-medium" data-time="02:00 PM" data-minutes="840">2:00 PM</button>
+          <button type="button" class="time-slot-btn rounded-xl py-3 text-sm font-display font-medium" data-time="05:00 PM" data-minutes="1020">5:00 PM</button>
+        </div>
+        <!-- Hidden input keeps id="time" so payload/WhatsApp/webhook logic is untouched -->
+        <input type="hidden" id="time" name="time">
+        <p id="no-slots-msg" class="text-muted text-xs mt-2 hidden">No slots left for today — please pick another date.</p>
       </div>
 
       <div class="md:col-span-2 mt-2">
@@ -840,111 +865,143 @@
   // Footer year
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // Populate time select: 8:00 AM to 8:00 PM in 30-min increments
-  const OPEN_MINUTES = 8 * 60;   // 8:00 AM
-  const CLOSE_MINUTES = 20 * 60; // 8:00 PM
+  // ------------------------------------------------------------------
+  // DATE / TIME LOGIC — Eastern Time (Virginia, USA), 4 fixed slots
+  // ------------------------------------------------------------------
 
-  (function populateTimes(){
-    const select = document.getElementById('time');
-    for (let m = OPEN_MINUTES; m <= CLOSE_MINUTES; m += 30) {
-      let hour = Math.floor(m / 60);
-      const minute = m % 60;
-      const period = hour >= 12 ? 'PM' : 'AM';
-      let displayHour = hour % 12;
-      if (displayHour === 0) displayHour = 12;
-      const label = `${displayHour}:${minute.toString().padStart(2,'0')} ${period}`;
-      const opt = document.createElement('option');
-      opt.value = label;
-      opt.textContent = label;
-      opt.dataset.minutes = m;       // total minutes from midnight, for scheduling math
-      opt.dataset.label = label;     // original clean label, restored on reset
-      select.appendChild(opt);
-    }
-  })();
+  const ET_ZONE = 'America/New_York';
+  const LEAD_TIME_MIN = 60;       // 1-hour minimum booking notice
+  const CLOSE_MINUTES = 20 * 60;  // 8:00 PM — no service may run past this
 
-  // Set min date to today
-  document.getElementById('date').min = new Date().toISOString().split('T')[0];
-
-  // --------------------------------------------------------------------
-  // DYNAMIC TIME-SLOT SCHEDULING
-  // Prevents booking a start time that would run past closing (8:00 PM),
-  // and visually blocks the subsequent slots that fall inside the
-  // service + travel window once a start time is chosen.
-  // --------------------------------------------------------------------
+  // Exact business-required block durations (service time + 40min travel)
   const SERVICE_DURATIONS_MIN = {
-    "Interior Detailing": 130,              // 90min service + 40min travel = 130min (2h10m) block
-    "Exterior Detailing": 130,              // 90min service + 40min travel = 130min (2h10m) block
-    "Full Ceramic Coating": 280,            // 240min service + 40min travel = 280min (4h40m) block
-    "Paint Correction": 280,                // 240min service + 40min travel = 280min (4h40m) block
-    "Full Package (All Services)": 280      // 240min service + 40min travel = 280min (4h40m) block
+    "Interior Detailing": 130,           // 90min service + 40min travel
+    "Exterior Detailing": 130,           // 90min service + 40min travel
+    "Full Ceramic Coating": 280,         // 240min service + 40min travel
+    "Paint Correction": 280,             // 240min service + 40min travel
+    "Full Package (All Services)": 280   // 240min service + 40min travel
   };
 
-  const serviceSelect = document.getElementById('service');
-  const timeSelect = document.getElementById('time');
+  // Returns { dateStr: "YYYY-MM-DD", minutesNow: minutes since midnight } in ET,
+  // regardless of the device's local timezone.
+  function getEasternNow(){
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: ET_ZONE,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    }).formatToParts(new Date());
+
+    const get = type => parts.find(p => p.type === type).value;
+    const dateStr = `${get('year')}-${get('month')}-${get('day')}`;
+    let hour = parseInt(get('hour'), 10);
+    if (hour === 24) hour = 0; // some locales format midnight as "24"
+    const minutesNow = hour * 60 + parseInt(get('minute'), 10);
+
+    return { dateStr, minutesNow };
+  }
+
+  const dateInput = document.getElementById('date');
+  const timeInput = document.getElementById('time');
+  const serviceSelectForTime = document.getElementById('service');
+  const slotButtons = document.querySelectorAll('.time-slot-btn');
+  const noSlotsMsg = document.getElementById('no-slots-msg');
+
+  // Block past dates — min = today in ET
+  const { dateStr: todayET } = getEasternNow();
+  dateInput.min = todayET;
 
   function getSelectedDuration(){
-    return SERVICE_DURATIONS_MIN[serviceSelect.value] || null;
+    return SERVICE_DURATIONS_MIN[serviceSelectForTime.value] || null;
   }
 
-  function resetTimeOptions(){
-    Array.from(timeSelect.options).forEach(opt => {
-      if (!opt.dataset.minutes) return; // skip placeholder option
-      opt.disabled = false;
-      opt.textContent = opt.dataset.label;
-    });
+  function clearSelection(){
+    timeInput.value = '';
+    slotButtons.forEach(b => b.classList.remove('selected'));
   }
 
-  // Disable start times that would push the job past closing time
-  function applyClosingCutoff(duration){
-    if (!duration) return;
-    Array.from(timeSelect.options).forEach(opt => {
-      if (!opt.dataset.minutes) return;
-      const startMin = parseInt(opt.dataset.minutes, 10);
-      if (startMin + duration > CLOSE_MINUTES) {
-        opt.disabled = true;
-      }
-    });
-  }
-
-  // Once a start time is chosen, grey out the subsequent slots that fall
-  // inside that appointment's working window (start, start+duration)
-  function applyStartTimeBlocking(duration){
-    const selectedOpt = timeSelect.options[timeSelect.selectedIndex];
-    if (!selectedOpt || !selectedOpt.dataset.minutes || !duration) return;
-
-    const startMin = parseInt(selectedOpt.dataset.minutes, 10);
-    const endMin = startMin + duration;
-
-    Array.from(timeSelect.options).forEach(opt => {
-      if (!opt.dataset.minutes) return;
-      const optMin = parseInt(opt.dataset.minutes, 10);
-      if (optMin > startMin && optMin < endMin) {
-        opt.disabled = true;
-        opt.textContent = `${opt.dataset.label} (Reserved)`;
-      }
-    });
-  }
-
-  function recomputeTimeAvailability(){
+  // Single source of truth: recomputes every slot's enabled/disabled state
+  // from scratch, combining three independent rules:
+  //   1) ET lead-time rule — can't book a slot that's already passed (+1h buffer)
+  //   2) Closing cutoff — service duration can't push past 8:00 PM
+  //   3) Overlap blocking — once a start time is chosen, grey out the
+  //      subsequent slots that fall inside that job's working window
+  function refreshSlotAvailability(){
+    const { dateStr: currentTodayET, minutesNow } = getEasternNow();
+    const selectedDate = dateInput.value;
+    const isToday = selectedDate === currentTodayET;
     const duration = getSelectedDuration();
 
-    resetTimeOptions();
+    // Reset all buttons to a clean, enabled state first
+    slotButtons.forEach(btn => {
+      btn.disabled = false;
+      btn.textContent = btn.dataset.time;
+    });
 
-    if (!duration) return; // no service chosen yet -> all slots available
+    // Rule 1: ET lead-time — disable slots already in the past (+1h buffer)
+    slotButtons.forEach(btn => {
+      const slotMinutes = parseInt(btn.dataset.minutes, 10);
+      if (isToday && slotMinutes < (minutesNow + LEAD_TIME_MIN)) {
+        btn.disabled = true;
+      }
+    });
 
-    applyClosingCutoff(duration);
-
-    // If the currently selected time is no longer valid, clear it
-    const currentOpt = timeSelect.options[timeSelect.selectedIndex];
-    if (currentOpt && currentOpt.disabled) {
-      timeSelect.value = "";
-    } else {
-      applyStartTimeBlocking(duration);
+    // Rule 2: closing cutoff — disable start times that would run past 8PM
+    if (duration) {
+      slotButtons.forEach(btn => {
+        const slotMinutes = parseInt(btn.dataset.minutes, 10);
+        if (slotMinutes + duration > CLOSE_MINUTES) {
+          btn.disabled = true;
+        }
+      });
     }
+
+    // If the previously selected slot is no longer valid, clear it
+    let activeBtn = Array.from(slotButtons).find(b => b.dataset.time === timeInput.value);
+    if (activeBtn && activeBtn.disabled) {
+      clearSelection();
+      activeBtn = null;
+    }
+
+    // Rule 3: overlap blocking — grey out slots inside the chosen window
+    if (activeBtn && duration) {
+      const startMin = parseInt(activeBtn.dataset.minutes, 10);
+      const endMin = startMin + duration;
+      slotButtons.forEach(btn => {
+        if (btn === activeBtn) return;
+        const m = parseInt(btn.dataset.minutes, 10);
+        if (m > startMin && m < endMin) {
+          btn.disabled = true;
+          btn.textContent = `${btn.dataset.time} (Reserved)`;
+        }
+      });
+    }
+
+    // Re-apply "selected" styling only to the still-valid active slot
+    slotButtons.forEach(b => b.classList.remove('selected'));
+    if (activeBtn) activeBtn.classList.add('selected');
+
+    const anyAvailable = Array.from(slotButtons).some(b => !b.disabled);
+    noSlotsMsg.classList.toggle('hidden', anyAvailable || !selectedDate);
   }
 
-  serviceSelect.addEventListener('change', recomputeTimeAvailability);
-  timeSelect.addEventListener('change', recomputeTimeAvailability);
+  // Slot click -> set hidden #time value, then recompute overlap blocking
+  slotButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      timeInput.value = btn.dataset.time;
+      refreshSlotAvailability();
+    });
+  });
+
+  dateInput.addEventListener('change', () => {
+    clearSelection();
+    refreshSlotAvailability();
+  });
+
+  serviceSelectForTime.addEventListener('change', refreshSlotAvailability);
+
+  // Initial state on page load
+  refreshSlotAvailability();
 
   // Booking form -> Make webhook (JSON) + WhatsApp
   const WHATSAPP_NUMBER = "13364032734"; // (336) 403-2734, US country code
