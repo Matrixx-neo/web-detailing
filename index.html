@@ -46,8 +46,6 @@
   }
   .text-muted{color:var(--text-muted);}
 
-  /* Signature: Ceramic Sheen Sweep — a diagonal reflection that glides across
-     panels on hover, echoing light passing over a ceramic-coated surface. */
   .sheen{
     position:relative;
     overflow:hidden;
@@ -135,7 +133,6 @@
   }
   select option{background:var(--bg-panel);}
 
-  /* Preferred Time — fixed slot buttons */
   .time-slot-btn{
     background:var(--bg-void);
     border:1px solid var(--line);
@@ -189,7 +186,6 @@
   }
   #mobile-menu.open{max-height:320px;}
 
-  /* Floating success toast */
   #toast{
     position:fixed;
     top:24px;
@@ -232,7 +228,6 @@
     #toast{transition:none;}
   }
 
-  /* FAQ Accordion */
   .faq-question{
     background:transparent;
     cursor:pointer;
@@ -248,10 +243,6 @@
   .faq-item.open .faq-icon{
     transform:rotate(180deg);
   }
-
-  /* ======================================================================
-     RESPONSIVE BREAKPOINTS
-     ====================================================================== */
 
   @media (min-width: 1200px){
     #booking-form{
@@ -334,7 +325,6 @@
 
 <body class="antialiased">
 
-<!-- Floating success toast -->
 <div id="toast" role="status" aria-live="polite">
   <span class="toast-icon">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 12L9 17L20 6" stroke="#5B90FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -342,7 +332,6 @@
   <span id="toast-message">Booking received successfully!</span>
 </div>
 
-<!-- ============ HEADER ============ -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-[#0A0C10]/85 backdrop-blur-md border-b border-[#242832]">
   <div class="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-20">
     <a href="#" class="flex items-center gap-2 select-none">
@@ -383,7 +372,6 @@
   </div>
 </header>
 
-<!-- ============ HERO ============ -->
 <section class="relative pt-40 pb-28 lg:pt-52 lg:pb-36 hero-glow overflow-hidden">
   <div class="absolute inset-0 grain"></div>
   <div class="relative max-w-5xl mx-auto px-6 text-center">
@@ -414,7 +402,6 @@
 
 <div class="divider-fade max-w-7xl mx-auto"></div>
 
-<!-- ============ SERVICES ============ -->
 <section id="services" class="py-24 lg:py-32 px-6">
   <div class="max-w-7xl mx-auto">
     <div class="max-w-2xl mb-16">
@@ -424,7 +411,6 @@
     </div>
 
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-
       <div class="card sheen rounded-2xl p-7 flex flex-col">
         <div class="card-topline w-full absolute top-0 left-0 rounded-t-2xl"></div>
         <div class="w-11 h-11 rounded-full bg-[#2F6FF0]/12 flex items-center justify-center mb-6">
@@ -460,14 +446,12 @@
         <h3 class="font-display font-semibold text-lg mb-2">Paint Correction</h3>
         <p class="text-muted text-sm leading-relaxed flex-1">Multi-stage machine polishing that removes swirls, oxidation, and fine scratches.</p>
       </div>
-
     </div>
   </div>
 </section>
 
 <div class="divider-fade max-w-7xl mx-auto"></div>
 
-<!-- ============ ABOUT / WHY CHOOSE US ============ -->
 <section id="about" class="py-24 lg:py-32 px-6">
   <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
     <div>
@@ -537,7 +521,6 @@
 
 <div class="divider-fade max-w-7xl mx-auto"></div>
 
-<!-- ============ HOURS STRIP ============ -->
 <section id="hours" class="py-16 px-6 border-y border-[#242832] bg-[#0D1016]">
   <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-x-16 gap-y-4 text-center sm:text-left">
     <div>
@@ -552,7 +535,6 @@
   </div>
 </section>
 
-<!-- ============ BOOKING FORM ============ -->
 <section id="booking" class="py-24 lg:py-32 px-6 hero-glow">
   <div class="max-w-3xl mx-auto">
     <div class="text-center mb-14">
@@ -634,7 +616,6 @@
           <button type="button" class="time-slot-btn rounded-xl py-3 text-sm font-display font-medium" data-time="02:00 PM" data-minutes="840">2:00 PM</button>
           <button type="button" class="time-slot-btn rounded-xl py-3 text-sm font-display font-medium" data-time="05:00 PM" data-minutes="1020">5:00 PM</button>
         </div>
-        <!-- Hidden input keeps id="time" so payload/webhook logic is untouched -->
         <input type="hidden" id="time" name="time">
         <p id="no-slots-msg" class="text-muted text-xs mt-2 hidden">No slots left for today — please pick another date.</p>
       </div>
@@ -651,7 +632,6 @@
 
 <div class="divider-fade max-w-7xl mx-auto"></div>
 
-<!-- ============ FAQ ============ -->
 <section id="faq" class="py-24 lg:py-32 px-6">
   <div class="max-w-4xl mx-auto">
     <div class="text-center mb-14">
@@ -661,7 +641,6 @@
     </div>
 
     <div class="space-y-4" id="faq-accordion">
-
       <p class="eyebrow mb-2 px-1">Logistics &amp; Requirements</p>
       <div class="faq-item card rounded-2xl overflow-hidden">
         <button type="button" class="faq-question w-full flex items-center justify-between gap-4 text-left px-6 py-5 sm:px-7 sm:py-6" aria-expanded="false">
@@ -819,7 +798,6 @@
           <p class="text-muted text-sm sm:text-base leading-relaxed pb-6 sm:pb-7">Select your service in our booking form above, choose your preferred date and time, and enter your address. It takes less than a minute!</p>
         </div>
       </div>
-
     </div>
 
     <div class="text-center mt-14">
@@ -833,7 +811,6 @@
 
 <div class="divider-fade max-w-7xl mx-auto"></div>
 
-<!-- ============ FOOTER ============ -->
 <footer class="pt-16 pb-8 px-6">
   <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-10 mb-12">
     <div>
@@ -866,7 +843,6 @@
 </footer>
 
 <script>
-  // Mobile menu toggle
   const menuBtn = document.getElementById('menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
   menuBtn.addEventListener('click', () => {
@@ -876,22 +852,16 @@
     link.addEventListener('click', () => mobileMenu.classList.remove('open'));
   });
 
-  // Footer year
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // ------------------------------------------------------------------
-  // DATE / TIME LOGIC — Eastern Time (Virginia, USA), 4 fixed slots
-  // ------------------------------------------------------------------
-
   const ET_ZONE = 'America/New_York';
-  const LEAD_TIME_MIN = 60;       // 1-hour minimum booking notice
-  const CLOSE_MINUTES = 20 * 60;  // 8:00 PM — no service may run past this
+  const LEAD_TIME_MIN = 60;       
+  const CLOSE_MINUTES = 20 * 60;  
 
-  // Updated times matching new Matrix (+40min travel time added to each)
   const SERVICE_DURATIONS_MIN = {
-    "Standard Detail (Starts at $100)": 130, // 90 min + 40 min travel
-    "Premium Detail (Starts at $149)": 190,  // 150 min + 40 min travel
-    "Full Detailing (Starts at $230)": 280   // 240 min + 40 min travel
+    "Standard Detail (Starts at $100)": 130, 
+    "Premium Detail (Starts at $149)": 190,  
+    "Full Detailing (Starts at $230)": 280   
   };
 
   function getEasternNow(){
@@ -997,11 +967,9 @@
   serviceSelectForTime.addEventListener('change', refreshSlotAvailability);
   refreshSlotAvailability();
 
-  // Make webhook (silent JSON POST)
   const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/hhjcxcw8m17tbwobiqtt4atgyhc8sbc2";
   const form = document.getElementById('booking-form');
 
-  // ZIP VALIDATOR
   const validZipCodes = [
     "22191", "22192", "22193", "22194", "22195", "22025", "22026", "22172", "22134",
     "22079", "22199", "22125", "22122", "22060", "22150", "22151", "22152", "22153", 
@@ -1044,7 +1012,6 @@
   zipInput.addEventListener('input', evaluateZip);
   evaluateZip(); 
 
-  // Hide address error when typing
   document.getElementById('address').addEventListener('input', () => {
     document.getElementById('address-error').classList.add('hidden');
   });
@@ -1091,7 +1058,6 @@
     const addonsElements = document.querySelectorAll('input[name="addons"]:checked');
     const addons = Array.from(addonsElements).map(el => el.value);
 
-    // Strict Address Regex Validation
     const addressRegex = /^\d+\s+[A-Za-z]+/;
     const addressError = document.getElementById('address-error');
     if(!addressRegex.test(address)){
@@ -1118,7 +1084,7 @@
     const originalBtnText = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.7';
-    submitBtn.textContent = 'Redirecting...';
+    submitBtn.textContent = 'Redirigiendo...';
 
     const payload = {
       fullName: fullName,
@@ -1143,11 +1109,13 @@
       });
 
       if (response.status === 200) {
-        // Redirección a WhatsApp inmediata tras éxito silencioso del Webhook
-        let addonsText = addons.length > 0 ? `%0A*Add-ons:* ${addons.join(', ')}` : '';
-        let waText = `Hello MC Mobile Detail! I just booked an appointment.%0A%0A*Name:* ${encodeURIComponent(fullName)}%0A*Vehicle:* ${encodeURIComponent(vehicleModel)} (${encodeURIComponent(vehicleSize)})%0A*Service:* ${encodeURIComponent(service)}${addonsText}%0A*Date/Time:* ${encodeURIComponent(formattedDate)} at ${encodeURIComponent(time)}%0A*Address:* ${encodeURIComponent(fullAddress)}`;
-        let waUrl = `https://wa.me/13364067467?text=${waText}`;
+        let mapQuery = encodeURIComponent(fullAddress.replace(/\s+/g, '+'));
+        let addonsText = addons.length > 0 ? `%0A➕ *Adicionales:* ${encodeURIComponent(addons.join(', '))}` : '';
         
+        // Mensaje redactado en ESPAÑOL idéntico al que le gusta a César
+        let waText = `🚨 *NUEVA CITA CONFIRMADA* 🚨%0A%0A👤 *Cliente:* ${encodeURIComponent(fullName)}%0A📱 *Teléfono:* ${encodeURIComponent(phone)}%0A🚗 *Vehículo:* ${encodeURIComponent(vehicleModel)} (${encodeURIComponent(vehicleSize)})%0A🧽 *Servicio:* ${encodeURIComponent(service)}${addonsText}%0A⏱️ *Fecha y Hora:* ${encodeURIComponent(formattedDate)} a las ${encodeURIComponent(time)}%0A%0A📍 *Ruta GPS Directa (Toca el enlace):*%0Ahttps://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+        
+        let waUrl = `https://wa.me/13364067467?text=${waText}`;
         window.location.href = waUrl;
       } else {
         showToast('Something went wrong. Please try again.', true);
@@ -1164,7 +1132,6 @@
     } 
   });
 
-  // FAQ accordion toggle
   document.querySelectorAll('.faq-question').forEach(button => {
     button.addEventListener('click', () => {
       const item = button.closest('.faq-item');
