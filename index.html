@@ -368,7 +368,7 @@
     </nav>
 
     <div class="flex items-center gap-4">
-      <a href="tel:+13364032734" class="hidden lg:block text-sm text-muted font-medium hover:text-white transition-colors">(336) 403-2734</a>
+      <a href="tel:+13364067467" class="hidden lg:block text-sm text-muted font-medium hover:text-white transition-colors">+1 (336) 406-7467</a>
       <a href="#booking" class="btn-primary hidden sm:inline-flex items-center gap-2 text-white text-sm font-semibold font-display px-5 py-2.5 rounded-full">
         Book Now
       </a>
@@ -553,7 +553,7 @@
     <div class="hidden sm:block w-px h-10 bg-[#242832]"></div>
     <div>
       <p class="eyebrow mb-1">Call Us</p>
-      <a href="tel:+13364032734" class="font-display font-600 text-lg hover:text-[#5B90FF] transition-colors">(336) 403-2734</a>
+      <a href="tel:+13364067467" class="font-display font-600 text-lg hover:text-[#5B90FF] transition-colors">+1 (336) 406-7467</a>
     </div>
   </div>
 </section>
@@ -564,7 +564,7 @@
     <div class="text-center mb-14">
       <p class="eyebrow mb-4">Reserve Your Slot</p>
       <h2 class="font-display font-700 text-3xl sm:text-4xl lg:text-5xl leading-tight">Schedule Your Detail</h2>
-      <p class="text-muted mt-4 text-base sm:text-lg">Fill in your details — we'll confirm the exact time with you over WhatsApp.</p>
+      <p class="text-muted mt-4 text-base sm:text-lg">Fill in your details below and we'll confirm your appointment shortly.</p>
     </div>
 
     <form id="booking-form" class="card rounded-3xl p-6 sm:p-8 lg:p-10 grid md:grid-cols-2 gap-5">
@@ -591,7 +591,8 @@
 
       <div>
         <label class="eyebrow block mb-2" for="zipCode">Zip Code</label>
-        <input required id="zipCode" name="zipCode" type="text" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" maxlength="10" placeholder="24060" autocomplete="postal-code" class="w-full rounded-xl px-4 py-3 text-sm">
+        <input required id="zipCode" name="zipCode" type="text" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" maxlength="10" placeholder="22191" autocomplete="postal-code" class="w-full rounded-xl px-4 py-3 text-sm">
+        <p id="zip-validation-msg" class="text-xs mt-2"></p>
       </div>
 
       <div>
@@ -619,17 +620,16 @@
           <button type="button" class="time-slot-btn rounded-xl py-3 text-sm font-display font-medium" data-time="02:00 PM" data-minutes="840">2:00 PM</button>
           <button type="button" class="time-slot-btn rounded-xl py-3 text-sm font-display font-medium" data-time="05:00 PM" data-minutes="1020">5:00 PM</button>
         </div>
-        <!-- Hidden input keeps id="time" so payload/WhatsApp/webhook logic is untouched -->
+        <!-- Hidden input keeps id="time" so payload/webhook logic is untouched -->
         <input type="hidden" id="time" name="time">
         <p id="no-slots-msg" class="text-muted text-xs mt-2 hidden">No slots left for today — please pick another date.</p>
       </div>
 
       <div class="md:col-span-2 mt-2">
-        <button type="submit" class="btn-primary w-full text-white font-display font-semibold px-8 py-4 rounded-full text-sm sm:text-base flex items-center justify-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5C11.3 9 10.8 7.8 10.6 7.3c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4-.1-.1-.2-.2-.5-.3z"/><path d="M12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.7 1.5 5.3L2 22l4.9-1.3C8.4 21.5 10.2 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.5-1.2l-.3-.2-3.3.9.9-3.2-.2-.3C3.9 14.8 3.5 13.4 3.5 12c0-4.7 3.8-8.5 8.5-8.5s8.5 3.8 8.5 8.5-3.8 8.5-8.5 8.5z"/></svg>
-          Confirm &amp; Schedule via WhatsApp
+        <button type="submit" disabled class="btn-primary w-full text-white font-display font-semibold px-8 py-4 rounded-full text-sm sm:text-base disabled:opacity-40 disabled:cursor-not-allowed">
+          Confirm Booking
         </button>
-        <p class="text-muted text-xs text-center mt-4">You'll be redirected to WhatsApp with your details pre-filled — just hit send.</p>
+        <p class="text-muted text-xs text-center mt-4">Enter a valid Zip Code within our service area to enable booking.</p>
       </div>
     </form>
   </div>
@@ -841,7 +841,7 @@
     <div>
       <p class="eyebrow mb-4">Contact</p>
       <p class="text-muted text-sm leading-relaxed">
-        <a href="tel:+13364032734" class="hover:text-white transition-colors">(336) 403-2734</a><br>
+        <a href="tel:+13364067467" class="hover:text-white transition-colors">+1 (336) 406-7467</a><br>
         Virginia, USA
       </p>
     </div>
@@ -1003,14 +1003,74 @@
   // Initial state on page load
   refreshSlotAvailability();
 
-  // Booking form -> Make webhook (JSON) + WhatsApp
-  const WHATSAPP_NUMBER = "13364032734"; // (336) 403-2734, US country code
-  const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/i881veabgto4djuax95gueuvdukvqajz";
+  // Booking form -> Make webhook (silent JSON POST, no WhatsApp redirect)
+  const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/hhjcxcw8m17tbwobiqtt4atgyhc8sbc2";
   const form = document.getElementById('booking-form');
 
-  // Floating toast helper
+  // --------------------------------------------------------------------
+  // SERVICE-AREA ZIP VALIDATOR — 20-mile radius from Woodbridge, VA 22191
+  // Note: compiled from known Northern Virginia zip codes grouped by city;
+  // for a production launch, cross-check edge cases (Fairfax, Centreville,
+  // Annandale, Gainesville) against an actual mileage calculation.
+  // --------------------------------------------------------------------
+  const validZipCodes = [
+    // Woodbridge / Dale City (base)
+    "22191", "22192", "22193", "22194", "22195",
+    // Dumfries / Montclair / Triangle / Quantico
+    "22025", "22026", "22172", "22134",
+    // Lorton / Occoquan / Newington / Fort Belvoir
+    "22079", "22199", "22125", "22122", "22060",
+    // Springfield / West Springfield / Burke / Fairfax Station
+    "22150", "22151", "22152", "22153", "22161", "22162", "22015", "22039",
+    // Alexandria (all)
+    "22301", "22302", "22303", "22304", "22305", "22306", "22307", "22308",
+    "22309", "22310", "22311", "22312", "22314", "22315",
+    // Manassas / Manassas Park / Bristow / Gainesville / Nokesville
+    "20109", "20110", "20111", "20112", "20113", "20136", "20155", "20181",
+    // Clifton / Centreville / Annandale
+    "20124", "20120", "20121", "22003",
+    // Fairfax (all)
+    "22030", "22031", "22032", "22033", "22034", "22035",
+    // Stafford (northern)
+    "22554", "22556"
+  ];
+
+  const zipInput = document.getElementById('zipCode');
+  const zipMsg = document.getElementById('zip-validation-msg');
+  const submitBtn = form.querySelector('button[type="submit"]');
+  let zipIsValid = false;
+
+  function evaluateZip(){
+    const val = zipInput.value.trim();
+    const digits = val.slice(0, 5); // compare on the base 5-digit zip
+
+    if (val.length < 5) {
+      zipMsg.textContent = '';
+      zipIsValid = false;
+      submitBtn.disabled = true;
+      return;
+    }
+
+    if (validZipCodes.includes(digits)) {
+      zipMsg.textContent = 'Location Approved: Within our service area.';
+      zipMsg.style.color = '#4ADE80';
+      zipIsValid = true;
+      submitBtn.disabled = false;
+    } else {
+      zipMsg.textContent = 'Out of coverage area. We currently only serve within 20 miles of Woodbridge, VA.';
+      zipMsg.style.color = '#F87171';
+      zipIsValid = false;
+      submitBtn.disabled = true;
+    }
+  }
+
+  zipInput.addEventListener('input', evaluateZip);
+  evaluateZip(); // initial state on page load (empty -> button stays disabled)
+
+  // Floating toast helper: shows the message, waits 3.5s, hides it and
+  // resets the form (used after a confirmed 200 OK from the webhook).
   let toastTimer;
-  function showToast(message, isError){
+  function showToast(message, isError, onHide){
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
     toastMessage.textContent = message;
@@ -1019,7 +1079,8 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toast.classList.remove('show');
-    }, 4000);
+      if (typeof onHide === 'function') onHide();
+    }, 3500);
   }
 
   // --------------------------------------------------------------------
@@ -1065,6 +1126,14 @@
       return;
     }
 
+    // Safety net: blocks submission even if the disabled button state were
+    // bypassed (e.g. hitting Enter in a text field submits the form
+    // regardless of the submit button's disabled attribute).
+    if (!zipIsValid) {
+      alert("We're sorry — this address is outside our 20-mile service area from Woodbridge, VA.");
+      return;
+    }
+
     const dateObj = new Date(dateRaw + 'T00:00:00');
     const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -1072,11 +1141,10 @@
     // Code to whatever the user typed in #address, without altering it.
     const fullAddress = buildFullAddress(address, zipCode);
 
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalBtnHTML = submitBtn.innerHTML;
+    const originalBtnText = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.7';
-    submitBtn.innerHTML = 'Sending…';
+    submitBtn.textContent = 'Sending…';
 
     const payload = {
       fullName: fullName,
@@ -1091,40 +1159,33 @@
       source: "MC Mobile Detail Website"
     };
 
-    // Send booking data to Make webhook
+    // Send booking data to Make webhook silently — no WhatsApp redirect
     try {
-      await fetch(MAKE_WEBHOOK_URL, {
+      const response = await fetch(MAKE_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      showToast('Booking received successfully!', false);
+
+      if (response.status === 200) {
+        // Success: show toast, then after 3.5s hide it and reset the form
+        showToast('Booking received successfully!', false, () => {
+          form.reset();
+          clearSelection();       // also clears the selected time slot
+          refreshSlotAvailability();
+          evaluateZip();         // zip field is now empty -> re-disables button
+        });
+      } else {
+        showToast('Something went wrong. Please try again.', true);
+      }
     } catch (err) {
       console.error('Webhook error:', err);
-      showToast('Booking saved. Continuing to WhatsApp…', true);
+      showToast('Something went wrong. Please try again.', true);
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnHTML;
+      submitBtn.disabled = !zipIsValid; // only re-enable if zip is still in coverage
+      submitBtn.style.opacity = '1';
+      submitBtn.textContent = originalBtnText;
     }
-
-    // Also open WhatsApp with the pre-filled message
-    const message =
-`Hello MC Mobile Detail, I'd like to schedule an appointment:
-
-*Name:* ${fullName}
-*Phone:* ${phone}
-*Vehicle:* ${vehicle}
-*Location:* ${fullAddress}
-*Service:* ${service}
-*Preferred Date:* ${formattedDate}
-*Preferred Time:* ${time}
-
-Please confirm my booking. Thank you!`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-
-    window.open(whatsappURL, '_blank');
   });
 
   // ------------------------------------------------------------------
