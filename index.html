@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -382,7 +383,30 @@ select option{background:var(--bg-panel);}
 
       <div class="booking-step" data-step="4">
         <h3 class="font-display font-semibold text-xl mb-6">Pick a date &amp; time</h3>
-        <div class="grid gap-5">
+        
+        <!-- MÓDULO DESPACHADOR (RUTAS) -->
+        <div class="mb-6 p-5 bg-[#171B22] border border-[#2F6FF0]/30 rounded-xl relative shadow-lg">
+          <div class="absolute -top-3 left-4 bg-[#2F6FF0] text-[10px] font-bold px-2 py-1 rounded text-white tracking-widest uppercase shadow">
+            Dispatcher Mode: Route Analyzer
+          </div>
+          <p class="text-xs text-muted mb-4 mt-2">Check if the drive takes under 45 mins. If longer, book for the next day.</p>
+          
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="text-[10px] uppercase text-muted font-bold tracking-wide">From: Previous Appointment</label>
+              <input type="text" id="routeZipA" value="22191" class="w-full bg-[#0A0C10] border border-[#242832] rounded-lg p-2.5 text-sm text-white mt-1 focus:border-[#5B90FF] transition-colors" title="Change this ZIP if you already have a client booked.">
+            </div>
+            <div>
+              <label class="text-[10px] uppercase text-muted font-bold tracking-wide">To: New Client</label>
+              <input type="text" id="routeZipB" readonly class="w-full bg-[#0A0C10]/50 border border-[#242832] rounded-lg p-2.5 text-sm text-[#8B93A1] mt-1">
+            </div>
+          </div>
+          <button type="button" onclick="checkMapRoute()" class="w-full bg-[#242832] hover:bg-[#5B90FF] text-white text-sm font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
+            📍 Open Google Maps (Live Traffic)
+          </button>
+        </div>
+        
+        <div class="grid gap-5 border-t border-[#242832] pt-6">
           <div>
             <label class="eyebrow block mb-2" for="date">Preferred Date</label>
             <input id="date" name="date" type="date" class="w-full rounded-xl px-4 py-3 text-sm">
@@ -638,25 +662,28 @@ select option{background:var(--bg-panel);}
   dateInput.addEventListener('change', () => { clearSelection(); refreshSlotAvailability(); });
   refreshSlotAvailability();
 
-  const validZipCodes = [
-    "22191", "22192", "22193", "22194", "22195",
-    "22025", "22026", "22172", "22134",
-    "22079", "22199", "22125", "22122", "22060",
-    "22150", "22151", "22152", "22153", "22161", "22162", "22015", "22039",
-    "22303", "22304", "22305", "22306", "22307", "22308", "22309", "22310", "22311", "22312", "22315",
-    "20109", "20110", "20111", "20112", "20113",
-    "22554"
-  ];
-
   const zipInput = document.getElementById('zipCode');
   const zipMsg = document.getElementById('zip-validation-msg');
   let zipIsValid = false;
 
   function evaluateZip(){
     const val = zipInput.value.trim();
-    const digits = val.slice(0, 5);
+    // Get pure digits to evaluate, grab first 5.
+    const digits = val.replace(/\D/g, '').slice(0, 5);
+    
+    // Automatically inject the new client's ZIP into the Dispatcher Module
+    const routeZipB = document.getElementById('routeZipB');
+    if (routeZipB) {
+      routeZipB.value = digits; 
+    }
+
     if (val.length < 5) { zipMsg.textContent = ''; zipIsValid = false; return; }
-    if (validZipCodes.includes(digits)) {
+    
+    // Logic for 30-mile validation utilizing Northern Virginia prefixes
+    const prefix3 = digits.slice(0, 3);
+    const validPrefixes = ["201", "220", "221", "222", "223", "224", "225"];
+    
+    if (validPrefixes.includes(prefix3)) {
       zipMsg.textContent = 'Location Approved: Within our service area.';
       zipMsg.style.color = '#4ADE80';
       zipIsValid = true;
@@ -668,6 +695,19 @@ select option{background:var(--bg-panel);}
   }
   zipInput.addEventListener('input', evaluateZip);
   evaluateZip();
+
+  // DISPATCHER ROUTE CHECKER
+  function checkMapRoute() {
+    const zipA = document.getElementById('routeZipA').value.trim();
+    const zipB = document.getElementById('routeZipB').value.trim();
+    if(!zipB || zipB.length < 5) {
+      alert("Please enter a valid Destination ZIP Code in Step 2 first.");
+      return;
+    }
+    const finalZipA = zipA || "22191";
+    // Open Google Maps Directions in a new tab
+    window.open(`https://www.google.com/maps/dir/${finalZipA}/${zipB}/`, '_blank');
+  }
 
   const addressRegex = /^\d+\s+[A-Za-z]/;
   document.getElementById('address').addEventListener('input', () => {
@@ -833,11 +873,21 @@ select option{background:var(--bg-panel);}
       });
 
       if (response.status === 200) {
-        const mapQuery = encodeURIComponent(fullAddress.replace(/\s+/g, '+'));
-        const addonsText = addons.length ? `%0A➕ *Adicionales:* ${encodeURIComponent(addons.join(', '))}` : '';
-        const seatText = `%0A🪑 *Asientos:* ${encodeURIComponent(seatMaterial)}${fabricAddonEl ? ' - ' + encodeURIComponent(fabricAddonEl.value) : ''}`;
-        const waText = `🚨 *NUEVA CITA CONFIRMADA* 🚨%0A%0A👤 *Cliente:* ${encodeURIComponent(fullName)}%0A📱 *Teléfono:* ${encodeURIComponent(phone)}%0A🚗 *Vehículo:* ${encodeURIComponent(vehicleModel)} (${encodeURIComponent(vehicleSize)})%0A🧽 *Servicio:* ${encodeURIComponent(service)}${seatText}${addonsText}%0A⏱️ *Fecha y Hora:* ${encodeURIComponent(formattedDate)} a las ${encodeURIComponent(time)}%0A🏠 *Ubicación:* ${encodeURIComponent(fullAddress)}%0A%0A📍 *Ruta GPS Directa (Toca el enlace):*%0Ahttps://www.google.com/maps/search/?api=1&query=${mapQuery}`;
-        window.location.href = `https://wa.me/13364067467?text=${waText}`;
+        
+        // --- WHATSAPP LINK FIX ---
+        const mapQuery = encodeURIComponent(fullAddress);
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+        
+        const addonsText = addons.length ? `\n➕ *Adicionales:* ${addons.join(', ')}` : '';
+        const seatText = `\n🪑 *Asientos:* ${seatMaterial}${fabricAddonEl ? ' - ' + fabricAddonEl.value : ''}`;
+        
+        // Bloque crudo usando saltos de línea reales (\n)
+        const rawWaText = `🚨 *NUEVA CITA CONFIRMADA* 🚨\n\n👤 *Cliente:* ${fullName}\n📱 *Teléfono:* ${phone}\n🚗 *Vehículo:* ${vehicleModel} (${vehicleSize})\n🧽 *Servicio:* ${service}${seatText}${addonsText}\n⏱️ *Fecha y Hora:* ${formattedDate} a las ${time}\n🏠 *Ubicación:* ${fullAddress}\n\n📍 *Ruta GPS Directa (Toca el enlace):*\n${mapsUrl}`;
+        
+        // Aplicamos encodeURIComponent a todo el bloque para que el enlace quede blindado
+        const finalWaUrl = `https://wa.me/13364067467?text=${encodeURIComponent(rawWaText)}`;
+        
+        window.location.href = finalWaUrl;
       } else {
         showToast('Something went wrong. Please try again.', true);
         submitBtn.disabled = false;
@@ -870,4 +920,3 @@ select option{background:var(--bg-panel);}
 </script>
 </body>
 </html>
-
